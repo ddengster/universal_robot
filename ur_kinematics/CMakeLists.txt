@@ -16,8 +16,6 @@ find_package(tf_conversions)
 
 find_package(Boost REQUIRED COMPONENTS system)
 
-#catkin_python_setup()
-
 ament_export_dependencies(roscpp geometry_msgs moveit_core moveit_kinematics moveit_ros_planning
     pluginlib tf_conversions Boost)
 ament_export_include_directories(include)

@@ -6,7 +6,7 @@ import datetime
 import socket, select
 import struct
 import traceback, code
-import SocketServer
+import socketserver
 
 import rospy
 
@@ -105,7 +105,7 @@ def main():
 
             # Attempts to extract a packet
             packet_length = struct.unpack_from("!i", buf)[0]
-            print("PacketLength: ", packet_length, "; BufferSize: ", len(buf))
+            print(("PacketLength: ", packet_length, "; BufferSize: ", len(buf)))
             if len(buf) >= packet_length:
                 packet, buf = buf[:packet_length], buf[packet_length:]
                 __on_packet(packet)
