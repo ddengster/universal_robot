@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.3)
 cmake_policy(SET CMP0057 NEW)
 project(ur_msgs)
 
@@ -23,5 +23,5 @@ rosidl_generate_interfaces(
    std_msgs
 )
 
-ament_package()
 ament_export_dependencies(rosidl_default_runtime std_msgs)
+ament_package()
