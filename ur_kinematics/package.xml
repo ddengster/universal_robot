@@ -23,8 +23,9 @@
   <depend>moveit_ros_planning</depend>
   <depend>roscpp</depend>
   <depend>geometry_msgs</depend>
+  <depend>class_loader</depend>
   <depend>pluginlib</depend>
-  <depend>tf_conversions</depend>
+  <depend>tf2_kdl</depend>
   <depend>boost</depend>
 
   <exec_depend>rospy</exec_depend>

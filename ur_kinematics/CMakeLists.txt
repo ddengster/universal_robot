@@ -6,13 +6,14 @@ add_compile_options(-std=c++11)
 
 find_package(ament_cmake REQUIRED)
 
-find_package(rclcpp)
-find_package(geometry_msgs)
-find_package(moveit_core)
-find_package(moveit_kinematics)
-find_package(moveit_ros_planning)
-find_package(pluginlib)
-find_package(tf_conversions)
+find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(moveit_core REQUIRED)
+find_package(moveit_kinematics REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(class_loader REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(tf2_kdl)
 
 find_package(Boost REQUIRED COMPONENTS system)
 
@@ -26,9 +27,17 @@ ament_package()
 ###########
 ## Build ##
 ###########
-
+message(${class_loader_INCLUDE_DIRS})
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
-include_directories(include ${rclcpp_INCLUDE_DIRS} ${geometry_msgs_INCLUDE_DIRS} ${moveit_core_INCLUDE_DIRS} ${moveit_kinematics_INCLUDE_DIRS} ${moveit_ros_planning_INCLUDE_DIRS} ${pluginlib_INCLUDE_DIRS} ${tf_conversions_INCLUDE_DIRS})
+include_directories(include ${rclcpp_INCLUDE_DIRS} 
+${geometry_msgs_INCLUDE_DIRS} 
+${moveit_core_INCLUDE_DIRS} 
+${moveit_kinematics_INCLUDE_DIRS} 
+${moveit_ros_planning_INCLUDE_DIRS}
+${class_loader_INCLUDE_DIRS}
+${pluginlib_INCLUDE_DIRS} 
+${tf2_kdl_INCLUDE_DIRS}
+)
 
 add_library(ur3_kin src/ur_kin.cpp)
 set_target_properties(ur3_kin PROPERTIES COMPILE_DEFINITIONS "UR3_PARAMS")
@@ -68,17 +77,17 @@ target_link_libraries(ur10_moveit_plugin
 #############
 
 install(TARGETS ur3_kin ur5_kin ur10_kin ur3_moveit_plugin ur5_moveit_plugin ur10_moveit_plugin
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 # install header files
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  DESTINATION include/${PROJECT_NAME}
 )
 
 # install moveit plugin description file
 install(FILES ur_moveit_plugins.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  DESTINATION share/${PROJECT_NAME}
 )

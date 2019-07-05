@@ -72,10 +72,10 @@
 
 /* Author: Sachin Chitta, David Lu!!, Ugo Cupcic */
 
-#include <class_loader/class_loader.h>
+#include <class_loader/class_loader.hpp>
 
 //#include <tf/transform_datatypes.h>
-#include <tf_conversions/tf_kdl.h>
+#include <tf2_kdl/tf2_kdl.h>
 #include <kdl_parser/kdl_parser.hpp>
 
 // URDF, SRDF

@@ -76,18 +76,18 @@
 #define UR_KINEMATICS_PLUGIN_
 
 // ROS
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <random_numbers/random_numbers.h>
 
 // System
 #include <boost/shared_ptr.hpp>
 
 // ROS msgs
-#include <geometry_msgs/PoseStamped.h>
-#include <moveit_msgs/GetPositionFK.h>
-#include <moveit_msgs/GetPositionIK.h>
-#include <moveit_msgs/KinematicSolverInfo.h>
-#include <moveit_msgs/MoveItErrorCodes.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <moveit_msgs/srv/get_position_fk.h>
+#include <moveit_msgs/srv/get_position_ik.h>
+#include <moveit_msgs/msg/kinematic_solver_info.h>
+#include <moveit_msgs/msg/move_it_error_codes.h>
 
 // KDL
 #include <kdl/jntarray.hpp>
