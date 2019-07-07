@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 cmake_policy(SET CMP0057 NEW)
 project(ur_kinematics)
 
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
 
 find_package(ament_cmake REQUIRED)
 

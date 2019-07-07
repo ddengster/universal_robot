@@ -84,10 +84,10 @@
 
 // ROS msgs
 #include <geometry_msgs/msg/pose_stamped.hpp>
-#include <moveit_msgs/srv/get_position_fk.h>
-#include <moveit_msgs/srv/get_position_ik.h>
-#include <moveit_msgs/msg/kinematic_solver_info.h>
-#include <moveit_msgs/msg/move_it_error_codes.h>
+#include <moveit_msgs/srv/get_position_fk.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
+#include <moveit_msgs/msg/kinematic_solver_info.hpp>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 
 // KDL
 #include <kdl/jntarray.hpp>
@@ -115,47 +115,47 @@ namespace ur_kinematics
 */
     URKinematicsPlugin();
 
-    virtual bool getPositionIK(const geometry_msgs::Pose &ik_pose,
+    virtual bool getPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                const std::vector<double> &ik_seed_state,
                                std::vector<double> &solution,
-                               moveit_msgs::MoveItErrorCodes &error_code,
+                               moveit_msgs::msg::MoveItErrorCodes &error_code,
                                const kinematics::KinematicsQueryOptions &options = kinematics::KinematicsQueryOptions()) const;
 
-    virtual bool searchPositionIK(const geometry_msgs::Pose &ik_pose,
+    virtual bool searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                   const std::vector<double> &ik_seed_state,
                                   double timeout,
                                   std::vector<double> &solution,
-                                  moveit_msgs::MoveItErrorCodes &error_code,
+                                  moveit_msgs::msg::MoveItErrorCodes &error_code,
                                   const kinematics::KinematicsQueryOptions &options = kinematics::KinematicsQueryOptions()) const;
 
-    virtual bool searchPositionIK(const geometry_msgs::Pose &ik_pose,
+    virtual bool searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                   const std::vector<double> &ik_seed_state,
                                   double timeout,
                                   const std::vector<double> &consistency_limits,
                                   std::vector<double> &solution,
-                                  moveit_msgs::MoveItErrorCodes &error_code,
+                                  moveit_msgs::msg::MoveItErrorCodes &error_code,
                                   const kinematics::KinematicsQueryOptions &options = kinematics::KinematicsQueryOptions()) const;
 
-    virtual bool searchPositionIK(const geometry_msgs::Pose &ik_pose,
+    virtual bool searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                   const std::vector<double> &ik_seed_state,
                                   double timeout,
                                   std::vector<double> &solution,
                                   const IKCallbackFn &solution_callback,
-                                  moveit_msgs::MoveItErrorCodes &error_code,
+                                  moveit_msgs::msg::MoveItErrorCodes &error_code,
                                   const kinematics::KinematicsQueryOptions &options = kinematics::KinematicsQueryOptions()) const;
 
-    virtual bool searchPositionIK(const geometry_msgs::Pose &ik_pose,
+    virtual bool searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                   const std::vector<double> &ik_seed_state,
                                   double timeout,
                                   const std::vector<double> &consistency_limits,
                                   std::vector<double> &solution,
                                   const IKCallbackFn &solution_callback,
-                                  moveit_msgs::MoveItErrorCodes &error_code,
+                                  moveit_msgs::msg::MoveItErrorCodes &error_code,
                                   const kinematics::KinematicsQueryOptions &options = kinematics::KinematicsQueryOptions()) const;
 
     virtual bool getPositionFK(const std::vector<std::string> &link_names,
                                const std::vector<double> &joint_angles,
-                               std::vector<geometry_msgs::Pose> &poses) const;
+                               std::vector<geometry_msgs::msg::Pose> &poses) const;
 
     virtual bool initialize(const std::string &robot_description,
                             const std::string &group_name,
@@ -190,12 +190,12 @@ namespace ur_kinematics
 * @param consistency_limit The returned solutuion will contain a value for the redundant joint in the range [seed_state(redundancy_limit)-consistency_limit,seed_state(redundancy_limit)+consistency_limit]
 * @return True if a valid solution was found, false otherwise
 */
-    bool searchPositionIK(const geometry_msgs::Pose &ik_pose,
+    bool searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                           const std::vector<double> &ik_seed_state,
                           double timeout,
                           std::vector<double> &solution,
                           const IKCallbackFn &solution_callback,
-                          moveit_msgs::MoveItErrorCodes &error_code,
+                          moveit_msgs::msg::MoveItErrorCodes &error_code,
                           const std::vector<double> &consistency_limits,
                           const kinematics::KinematicsQueryOptions &options = kinematics::KinematicsQueryOptions()) const;
 
@@ -203,7 +203,7 @@ namespace ur_kinematics
 
   private:
 
-    bool timedOut(const ros::WallTime &start_time, double duration) const;
+    bool timedOut(const std::chrono::system_clock &start_time, double duration) const;
 
 
     /** @brief Check whether the solution lies within the consistency limit of the seed state
@@ -238,9 +238,9 @@ namespace ur_kinematics
 
     bool active_; /** Internal variable that indicates whether solvers are configured and ready */
 
-    moveit_msgs::KinematicSolverInfo ik_chain_info_; /** Stores information for the inverse kinematics solver */
+    moveit_msgs::msg::KinematicSolverInfo ik_chain_info_; /** Stores information for the inverse kinematics solver */
 
-    moveit_msgs::KinematicSolverInfo fk_chain_info_; /** Store information for the forward kinematics solver */
+    moveit_msgs::msg::KinematicSolverInfo fk_chain_info_; /** Store information for the forward kinematics solver */
 
     KDL::Chain kdl_chain_;
 

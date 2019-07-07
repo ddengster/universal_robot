@@ -74,7 +74,7 @@
 
 #include <class_loader/class_loader.hpp>
 
-//#include <tf/transform_datatypes.h>
+#include <tf2/convert.h>
 #include <tf2_kdl/tf2_kdl.h>
 #include <kdl_parser/kdl_parser.hpp>
 
@@ -173,13 +173,13 @@ bool URKinematicsPlugin::initialize(const std::string &robot_description,
 {
   setValues(robot_description, group_name, base_frame, tip_frame, search_discretization);
 
-  rdf_loader::RDFLoader rdf_loader(robot_description_);
+  rdf_loader::RDFLoader rdf_loader(, robot_description_);
   const srdf::ModelSharedPtr &srdf = rdf_loader.getSRDF();
   const urdf::ModelInterfaceSharedPtr &urdf_model = rdf_loader.getURDF();
 
   if (!urdf_model || !srdf)
   {
-    ROS_ERROR_NAMED("kdl","URDF and SRDF must be loaded for KDL kinematics solver to work.");
+    RCUTILS_LOG_ERROR_NAMED("kdl","URDF and SRDF must be loaded for KDL kinematics solver to work.");
     return false;
   }
 
@@ -191,12 +191,12 @@ bool URKinematicsPlugin::initialize(const std::string &robot_description,
   
   if(!joint_model_group->isChain())
   {
-    ROS_ERROR_NAMED("kdl","Group '%s' is not a chain", group_name.c_str());
+    RCUTILS_LOG_ERROR_NAMED("kdl","Group '%s' is not a chain", group_name.c_str());
     return false;
   }
   if(!joint_model_group->isSingleDOFJoints())
   {
-    ROS_ERROR_NAMED("kdl","Group '%s' includes joints that have more than 1 DOF", group_name.c_str());
+    RCUTILS_LOG_ERROR_NAMED("kdl","Group '%s' includes joints that have more than 1 DOF", group_name.c_str());
     return false;
   }
 
@@ -204,12 +204,12 @@ bool URKinematicsPlugin::initialize(const std::string &robot_description,
 
   if (!kdl_parser::treeFromUrdfModel(*urdf_model, kdl_tree))
   {
-    ROS_ERROR_NAMED("kdl","Could not initialize tree object");
+    RCUTILS_LOG_ERROR_NAMED("kdl","Could not initialize tree object");
     return false;
   }
   if (!kdl_tree.getChain(base_frame_, getTipFrame(), kdl_chain_))
   {
-    ROS_ERROR_NAMED("kdl","Could not initialize chain object");
+    RCUTILS_LOG_ERROR_NAMED("kdl","Could not initialize chain object");
     return false;
   }
 
@@ -219,7 +219,7 @@ bool URKinematicsPlugin::initialize(const std::string &robot_description,
     if(joint_model_group->getJointModels()[i]->getType() == moveit::core::JointModel::REVOLUTE || joint_model_group->getJointModels()[i]->getType() == moveit::core::JointModel::PRISMATIC)
     {
       ik_chain_info_.joint_names.push_back(joint_model_group->getJointModelNames()[i]);
-      const std::vector<moveit_msgs::JointLimits> &jvec = joint_model_group->getJointModels()[i]->getVariableBoundsMsg();
+      const std::vector<moveit_msgs::msg::JointLimits> &jvec = joint_model_group->getJointModels()[i]->getVariableBoundsMsg();
       ik_chain_info_.limits.insert(ik_chain_info_.limits.end(), jvec.begin(), jvec.end());
     }
   }
@@ -229,7 +229,7 @@ bool URKinematicsPlugin::initialize(const std::string &robot_description,
 
   if(!joint_model_group->hasLinkModel(getTipFrame()))
   {
-    ROS_ERROR_NAMED("kdl","Could not find tip name in joint group '%s'", group_name.c_str());
+    RCUTILS_LOG_ERROR_NAMED("kdl","Could not find tip name in joint group '%s'", group_name.c_str());
     return false;
   }
   ik_chain_info_.link_names.push_back(getTipFrame());
@@ -254,7 +254,7 @@ bool URKinematicsPlugin::initialize(const std::string &robot_description,
   lookupParam(group_name+"/position_only_ik", position_ik, false);
 
   if(position_ik)
-    ROS_INFO_NAMED("kdl","Using position only ik");
+    RCUTILS_LOG_INFO_NAMED("kdl","Using position only ik");
 
   num_possible_redundant_joints_ = kdl_chain_.getNrOfJoints() - joint_model_group->getMimicJointModels().size() - (position_ik? 3:6);
 
@@ -345,13 +345,13 @@ bool URKinematicsPlugin::initialize(const std::string &robot_description,
   for(int i=1; i<6; i++) {
     cur_ur_joint_ind = getJointIndex(ur_joint_names_[i]);
     if(cur_ur_joint_ind < 0) {
-      ROS_ERROR_NAMED("kdl", 
+      RCUTILS_LOG_ERROR_NAMED("kdl",
         "Kin chain provided in model doesn't contain standard UR joint '%s'.", 
         ur_joint_names_[i].c_str());
       return false;
     }
     if(cur_ur_joint_ind != last_ur_joint_ind + 1) {
-      ROS_ERROR_NAMED("kdl", 
+      RCUTILS_LOG_ERROR_NAMED("kdl",
         "Kin chain provided in model doesn't have proper serial joint order: '%s'.", 
         ur_joint_names_[i].c_str());
       return false;
@@ -375,7 +375,7 @@ bool URKinematicsPlugin::initialize(const std::string &robot_description,
   }
 
   active_ = true;
-  ROS_DEBUG_NAMED("kdl","KDL solver initialized");
+  RCUTILS_LOG_DEBUG_NAMED("kdl","KDL solver initialized");
   return true;
 }
 
@@ -383,12 +383,12 @@ bool URKinematicsPlugin::setRedundantJoints(const std::vector<unsigned int> &red
 {
   if(num_possible_redundant_joints_ < 0)
   {
-    ROS_ERROR_NAMED("kdl","This group cannot have redundant joints");
+    RCUTILS_LOG_ERROR_NAMED("kdl","This group cannot have redundant joints");
     return false;
   }
   if(redundant_joints.size() > num_possible_redundant_joints_)
   {
-    ROS_ERROR_NAMED("kdl","This group can only have %d redundant joints", num_possible_redundant_joints_);
+    RCUTILS_LOG_ERROR_NAMED("kdl","This group can only have %d redundant joints", num_possible_redundant_joints_);
     return false;
   }
   std::vector<unsigned int> redundant_joints_map_index;
@@ -416,7 +416,7 @@ counter++;
     }
   }
   for(std::size_t i=0; i < redundant_joints_map_index.size(); ++i)
-    ROS_DEBUG_NAMED("kdl","Redundant joint map index: %d %d", (int) i, (int) redundant_joints_map_index[i]);
+    RCUTILS_LOG_ERROR_NAMED("kdl","Redundant joint map index: %d %d", (int) i, (int) redundant_joints_map_index[i]);
 
   redundant_joints_map_index_ = redundant_joints_map_index;
   redundant_joint_indices_ = redundant_joints;
@@ -444,15 +444,15 @@ int URKinematicsPlugin::getKDLSegmentIndex(const std::string &name) const
   return -1;
 }
 
-bool URKinematicsPlugin::timedOut(const ros::WallTime &start_time, double duration) const
+bool URKinematicsPlugin::timedOut(const std::chrono::system_clock &start_time, double duration) const
 {
-  return ((ros::WallTime::now()-start_time).toSec() >= duration);
+  return ((std::chrono::system_clock::now()-start_time).toSec() >= duration);
 }
 
-bool URKinematicsPlugin::getPositionIK(const geometry_msgs::Pose &ik_pose,
+bool URKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                         const std::vector<double> &ik_seed_state,
                                         std::vector<double> &solution,
-                                        moveit_msgs::MoveItErrorCodes &error_code,
+                                        moveit_msgs::msg::MoveItErrorCodes &error_code,
                                         const kinematics::KinematicsQueryOptions &options) const
 {
   const IKCallbackFn solution_callback = 0;
@@ -468,11 +468,11 @@ bool URKinematicsPlugin::getPositionIK(const geometry_msgs::Pose &ik_pose,
                           options);
 }
 
-bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
+bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                            const std::vector<double> &ik_seed_state,
                                            double timeout,
                                            std::vector<double> &solution,
-                                           moveit_msgs::MoveItErrorCodes &error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes &error_code,
                                            const kinematics::KinematicsQueryOptions &options) const
 {
   const IKCallbackFn solution_callback = 0;
@@ -488,12 +488,12 @@ bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
                           options);
 }
 
-bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
+bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                            const std::vector<double> &ik_seed_state,
                                            double timeout,
                                            const std::vector<double> &consistency_limits,
                                            std::vector<double> &solution,
-                                           moveit_msgs::MoveItErrorCodes &error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes &error_code,
                                            const kinematics::KinematicsQueryOptions &options) const
 {
   const IKCallbackFn solution_callback = 0;
@@ -507,12 +507,12 @@ bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
                           options);
 }
 
-bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
+bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                            const std::vector<double> &ik_seed_state,
                                            double timeout,
                                            std::vector<double> &solution,
                                            const IKCallbackFn &solution_callback,
-                                           moveit_msgs::MoveItErrorCodes &error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes &error_code,
                                            const kinematics::KinematicsQueryOptions &options) const
 {
   std::vector<double> consistency_limits;
@@ -526,7 +526,7 @@ bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
                           options);
 }
 
-bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
+bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                            const std::vector<double> &ik_seed_state,
                                            double timeout,
                                            const std::vector<double> &consistency_limits,
@@ -549,7 +549,7 @@ typedef std::pair<int, double> idx_double;
 bool comparator(const idx_double& l, const idx_double& r)
 { return l.second < r.second; }
 
-bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
+bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                                            const std::vector<double> &ik_seed_state,
                                            double timeout,
                                            std::vector<double> &solution,
@@ -558,9 +558,9 @@ bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
                                            const std::vector<double> &consistency_limits,
                                            const kinematics::KinematicsQueryOptions &options) const
 {
-  ros::WallTime n1 = ros::WallTime::now();
+  std::chrono::system_clock n1 = std::chrono::system_clock::now();
   if(!active_) {
-    ROS_ERROR_NAMED("kdl","kinematics not active");
+    RCUTILS_LOG_ERROR_NAMED("kdl","kinematics not active");
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
@@ -614,12 +614,12 @@ bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
       solution[i] = jnt_pos_test(i);
 
     if(fk_solver_base.JntToCart(jnt_pos_base, pose_base) < 0) {
-      ROS_ERROR_NAMED("kdl", "Could not compute FK for base chain");
+      RCUTILS_LOG_DEBUG_NAMED("kdl", "Could not compute FK for base chain");
       return false;
     }
 
     if(fk_solver_tip.JntToCart(jnt_pos_tip, pose_tip) < 0) {
-      ROS_ERROR_NAMED("kdl", "Could not compute FK for tip chain");
+      RCUTILS_LOG_DEBUG_NAMED("kdl", "Could not compute FK for tip chain");
       return false;
     }
     /////////////////////////////////////////////////////////////////////////////
@@ -748,12 +748,12 @@ bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
     // none of the solutions were both consistent and passed the solution callback
 
     if(options.lock_redundant_joints) {
-      ROS_DEBUG_NAMED("kdl","Will not pertubate redundant joints to find solution");
+      RCUTILS_LOG_DEBUG_NAMED("kdl","Will not pertubate redundant joints to find solution");
       break;
     }
 
     if(dimension_ == 6) {
-      ROS_DEBUG_NAMED("kdl","No other joints to pertubate, cannot find solution");
+      RCUTILS_LOG_DEBUG_NAMED("kdl","No other joints to pertubate, cannot find solution");
       break;
     }
 
@@ -765,7 +765,7 @@ bool URKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose &ik_pose,
     }
   }
 
-  ROS_DEBUG_NAMED("kdl","An IK that satisifes the constraints and is collision free could not be found");
+  RCUTILS_LOG_DEBUG_NAMED("kdl","An IK that satisifes the constraints and is collision free could not be found");
   error_code.val = error_code.NO_IK_SOLUTION;
   return false;
 }
@@ -774,22 +774,22 @@ bool URKinematicsPlugin::getPositionFK(const std::vector<std::string> &link_name
                                         const std::vector<double> &joint_angles,
                                         std::vector<geometry_msgs::Pose> &poses) const
 {
-  ros::WallTime n1 = ros::WallTime::now();
+  std::chrono::system_clock n1 = std::chrono::system_clock::now();
   if(!active_)
   {
-    ROS_ERROR_NAMED("kdl","kinematics not active");
+    RCUTILS_LOG_ERROR_NAMED("kdl","kinematics not active");
     return false;
   }
   poses.resize(link_names.size());
   if(joint_angles.size() != dimension_)
   {
-    ROS_ERROR_NAMED("kdl","Joint angles vector must have size: %d",dimension_);
+    RCUTILS_LOG_ERROR_NAMED("kdl","Joint angles vector must have size: %d",dimension_);
     return false;
   }
 
   KDL::Frame p_out;
-  geometry_msgs::PoseStamped pose;
-  tf::Stamped<tf::Pose> tf_pose;
+  geometry_msgs::msg::PoseStamped pose;
+  tf2::Stamped<tf2::Pose> tf_pose;
 
   KDL::JntArray jnt_pos_in(dimension_);
   for(unsigned int i=0; i < dimension_; i++)
