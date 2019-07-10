@@ -203,7 +203,7 @@ namespace ur_kinematics
 
   private:
 
-    bool timedOut(const std::chrono::system_clock &start_time, double duration) const;
+    bool timedOut(const std::chrono::system_clock::time_point &start_time, double duration) const;
 
 
     /** @brief Check whether the solution lies within the consistency limit of the seed state
