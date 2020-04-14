@@ -4,6 +4,10 @@ project(ur_gazebo)
 
 find_package(ament_cmake REQUIRED)
 
+install(DIRECTORY launch controller DESTINATION share/${PROJECT_NAME})
+
+ament_export_dependencies(ament_cmake)
+
 ament_package()
 
 #if (BUILD_TESTING)
@@ -11,4 +15,4 @@ ament_package()
 #  roslaunch_add_file_check(tests/roslaunch_test.xml)
 #endif()
 
-install(DIRECTORY launch controller DESTINATION share/${PROJECT_NAME})
+
